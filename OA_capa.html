@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OA 대시보드</title>
+<style>
+*{
+
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+
+}
+body{
+    font-family:
+    "Pretendard",
+    "Noto Sans KR",
+    sans-serif;
+
+    background:linear-gradient(
+        140deg,
+        #fde8ef,
+        #f7e9ff,
+        #eef5ff
+     );
+    margin: 0;
+    padding:0;
+    color:var(--text);
+    overflow-x:hidden;
+    min-height:100vh;
+    box-sizing: border-box;
+
+
+}
+  button, input, select { font: inherit; }
+  button { cursor: pointer; }
+ 
+ 
+  :root {
+    --pink: #ec0a82;
+    --pink-deep: #d80072;
+    --lavender: #efe8ff;
+    --lavender-2: #f7efff;
+    --bg: #f5efff;
+    --card: rgba(255,255,255,.82);
+    --border: rgba(255,255,255,.72);
+    --text: #292733;
+    --muted: #77788a;
+    --blue: #4f83e8;
+    --green: #18a98c;
+    --purple: #9a68df;
+    --orange: #e8a22a;
+    --red: #e65362;
+    --shadow: 0 14px 35px rgba(112, 76, 160, .12);
+  }
+ 
+  .topbar {
+    height: 58px;
+    background: rgba(255,255,255,.78); color:var(--text); backdrop-filter: blur(18px);
+    color: white;
+    display: flex;
+    align-items: center;
+    padding: 0 22px;
+    gap: 24px;
+    box-shadow: 0 8px 28px rgba(105,72,145,.10); border-bottom:1px solid rgba(255,255,255,.8);
+  }
+  .brand { font-size: 20px; font-weight: 800; color:var(--pink); }
+  .crumb { opacity: .9; font-size: 14px; color:#33313d; font-weight:700; }
+  .top-actions { margin-left: auto; display:flex; align-items:center; gap:20px; }
+  .bell { position:relative; font-size:20px; }
+  .badge {
+    position:absolute; top:-7px; right:-9px;
+    background:#e84d4d; color:#fff; border-radius:20px;
+    min-width:16px; height:16px; text-align:center; font-size:10px; line-height:16px;
+  }
+  .user { display:flex; align-items:center; gap:8px; color:#222 }
+  .avatar {
+    width:34px; height:34px; border-radius:50%; background:linear-gradient(135deg,#d60079,#9d19ce);
+    color:#fff; display:grid; place-items:center; font-weight:700;
+  }
+ 
+  .layout { display:flex; min-height:calc(100vh - 62px); }
+  .sidebar {
+    width:204px; flex:0 0 168px; background:rgba(255,255,255,.45);
+    border-right:1px solid rgba(210,201,225,.72); backdrop-filter:blur(14px);
+    padding:12px 8px; transition:width .25s ease, flex-basis .25s ease, padding .25s ease;
+    overflow:visible; position:relative;
+  }
+  .sidebar.collapsed {
+    width:64px; flex-basis:64px; padding-left:8px; padding-right:8px;
+  }
+  .sidebar-toggle {
+    position:absolute;
+    top:92px;
+    right:-13px;
+    z-index:20;
+    width:26px;
+    height:26px;
+    border:1px solid rgba(255,255,255,.95);
+    background:rgba(255,255,255,.94);
+    border-radius:50%;
+    color:#6d6878;
+    box-shadow:0 5px 14px rgba(91,62,130,.16);
+    font-size:17px;
+    line-height:24px;
+    padding:0;
+    cursor:pointer;
+    transition:background .2s, color .2s, transform .2s;
+  }
+  .sidebar-toggle:hover {
+    background:var(--pink);
+    color:#fff;
+    transform:scale(1.06);
+  }
+  .sidebar.collapsed .sidebar-toggle {
+    right:-13px;
+  }
+  .nav a { white-space:nowrap; }
+  .sidebar.collapsed .nav a {
+    justify-content:center; padding-left:0; padding-right:0;
+  }
+  .sidebar.collapsed .nav-label { display:none; }
+  .sidebar.collapsed .nav-icon { margin:0; }
+ 
+  .nav {
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .nav a {
+    text-decoration:none; color:#536277; padding:12px 11px; border-radius:7px;
+    display:flex; align-items:center; gap:10px; font-weight:600;
+  }
+  .nav a:hover { background:rgba(236,10,130,.07); color:var(--pink-deep); }
+  .nav a.active { background:rgba(236,10,130,.10); color:var(--pink-deep); }
+  .nav-icon { width:20px; text-align:center; font-size:16px; }
+ 
+  main {flex:1; padding:22px 28px 34px; min-width:0; }
+  .page-head {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .page-title { font-size:21px; font-weight:800; margin:0; color:#292733; }
+  .page-tools { display:flex; gap:10px; align-items:center; }
+  .date-picker, .btn {
+    height:36px; border:1px solid var(--border); background:#fff;
+    border-radius:6px; padding:0 13px; color:var(--text); 
+  }
+  .btn.small {
+    height:24px; border:1px solid var(--border); background:#f2f2f2;
+    border-radius:4px; padding:0 10px; color:var(--text); font-weight:700; 
+  }
+  .btn.primary {
+    background:var(--pink); color:#fff; border-color:var(--pink);
+    font-weight:700; padding:0 18px;
+  }
+  .btn.primary:hover { background:var(--pink-deep); }
+ 
+  .channels { margin:0 0 14px; display:flex; gap:14px; align-items:center; }
+  .channels label { display:flex; align-items:center; gap:5px; }
+  input[type="checkbox"] { accent-color:#087cf0; }
+ 
+  .main-grid {
+    display:grid; grid-template-columns: 560px minmax(640px, 1fr);
+    gap:12px; align-items:start;
+  }
+  .card {
+    background:var(--card); border:1px solid var(--border);
+    border-radius:24px; box-shadow:var(--shadow); backdrop-filter:blur(18px);
+  }
+ 
+  /* Calendar */
+  .calendar-card { padding:18px; border-radius:24px; }
+  .month-head {
+    display:flex; justify-content:center; align-items:center; gap:22px;
+    margin-bottom:14px;
+  }
+  .month-head strong { font-size:17px; color:#373340; }
+  .square-btn {
+    width:28px; height:28px; border:1px solid var(--border); background:#fff;
+    border-radius:5px; color:#536277;
+  }
+  .calendar {
+    display:grid; grid-template-columns:repeat(7,1fr);
+    border-top:1px solid var(--border); border-left:1px solid var(--border);
+  }
+  .dow, .day {
+    border-right:1px solid var(--border); border-bottom:1px solid var(--border);
+  }
+  .dow {
+    height:34px; display:grid; place-items:center; font-weight:600; color:#536277;
+    background:#fafbfd;
+  }
+  .dow.sun { color:#e34d4d; } .dow.sat { color:#2d69d6; }
+  .day {
+    min-height:82px; padding:5px 5px 4px; position:relative; background:#fff;
+  }
+  .day.muted { color:#b7c0cb; background:#fbfcfd; }
+  .day.today { outline:2px solid var(--pink); outline-offset:-2px; background:rgba(236,10,130,.06); }
+  .day-num { font-size:12px; font-weight:600; }
+  .day-lines { margin-top:5px; line-height:1.35; font-size:10px; }
+  .day-lines div:nth-child(1) { color:#2777e8; }
+  .day-lines div:nth-child(2) { color:#00a18d; }
+  .day-lines div:nth-child(3) { color:#8958d9; }
+  .calendar-legend { margin-top:7px; color:#748196; font-size:10px; display:flex; gap:10px; }
+  .legend-dot { width:8px; height:8px; border-radius:50%; display:inline-block; margin-right:3px; }
+  .legend-mms { background:#2777e8; } .legend-push { background:#00a18d; } .legend-rcs { background:#8958d9; }
+ 
+  .notice { margin-top:2px; }
+  .notice-title { font-weight:700; color:#4b5b72; margin-bottom:4px;font-size: 13px}
+  .notice ul { margin:4px 0px 6px 20px; padding:0; font-size:13px; line-height:1.5; }
+  .notice .small { margin:4px 0px 2px 10px; padding:0;color:#333; font-size:13px;line-height:1.5 }
+  .notice .blue { margin:4px 0px 2px 10px; padding:0;color:#166bd4; font-size:13px; line-height:1.5}
+ 
+ 
+  /* Right */
+  .campaign-card { padding:16px; min-width:0; border-radius:24px;}
+  .section-title { display:flex; align-items:center; gap:8px; font-size:15px; font-weight:700; margin-bottom:10px; }
+  .section-title .mark { color:var(--pink); }
+  .filters {
+    display:grid; grid-template-columns: 60px 120px 24px 120px 120px 200px 300px 1fr;
+    gap:7px; align-items:center; margin-bottom:10px;
+  }
+  .filters input, .filters select {
+    height:28px; border:1px solid #ccd5df; border-radius:4px;font-size: 12px;
+    background:#fff; padding:0 8px; color:#46566e; min-width:0;
+  }
+  .filters .dash { text-align:center; color:#8994a5; }
+  .filters .search-btn { height:28px; border:1px solid #bfc8d4; background:#fff; border-radius:4px; font-size:13px }
+  .filters .search-input {width:300px;}
+ 
+  .table-wrap { overflow:auto; border:1px solid var(--border); border-radius:3px; }
+
+  table {
+    border-collapse:collapse;
+    width:100%;
+    min-width:1180px;
+    table-layout:fixed;
+  }
+  th:nth-child(1), td:nth-child(1) { width:70px; }
+  th:nth-child(2), td:nth-child(2) { width:120px; }
+  th:nth-child(3), td:nth-child(3) { width:90px; }
+  th:nth-child(4), td:nth-child(4) { width:90px; }
+  th:nth-child(5), td:nth-child(5) { width:90px; }
+  th:nth-child(6), td:nth-child(6) { width:65px; }
+  th:nth-child(7), td:nth-child(7) { width:120px; }
+  th:nth-child(8), td:nth-child(8) { width:180px; }
+  th:nth-child(9), td:nth-child(9) { width:250px; }
+  th:nth-child(10), td:nth-child(10) { width:95px; }
+  th {
+    background:rgba(247,239,255,.72); color:#514c5d; height:34px; font-size:11px;
+    border-right:1px solid #d7dce3; border-bottom:1px solid #d7dce3;
+    white-space:nowrap;
+  }
+  td {
+    height:38px; padding:0 8px; border-right:1px solid #e1e5ea;
+    border-bottom:1px solid #e7eaee; white-space:nowrap; text-align:center;
+    color:#43526a; font-size:11px;
+  }
+  tr:hover td { background:#f8fbfc; }
+  .channel { color:#057b80; font-weight:700; }
+  .channel.push { color:#00a18d; }
+  .num-blue { color:#126fe7; font-weight:700; }
+  .num-red { color:#e33f3f; font-weight:700; }
+  .num-dark { color:#1f2d42; font-weight:700; }
+  .status {
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:4px 9px; border-radius:13px; font-size:10px; font-weight:700;
+    background:#f2f4f7; color:#6a778a;
+  }
+  .status.done { background:#e8faf5; color:#0b987a; }
+  .status.running { background:#f0eaff; color:#8053ca; }
+  .status.wait { background:#fff0f7; color:#d90070; }
+ 
+  .summary {
+    display:flex; gap:10px; margin-top:11px; align-items:center; font-size: 12px;
+  }
+  .summary-item { color:#657388; }
+  .summary-value {
+    margin-left:4px; padding:5px 10px; border:1px solid #ccd5df;
+    border-radius:3px; background:#fff; color:#4c5b70;
+  }
+  .warning { margin-top:10px; color:#ef4b4b; font-size:11px; line-height:1.6; }
+ 
+  /* Dashboard bottom */
+  .bottom-grid {
+    margin-top:12px; display:grid; grid-template-columns: 560px 1fr 1fr; gap:12px;
+  }
+  .metric-card { padding:18px; border-radius:24px; }
+  .metric-title { font-weight:700; margin-bottom:12px; }
+  .metric-columns { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .metric {
+    border:1px solid #e1e6ec; border-radius:5px; padding:12px;
+    position:relative; min-height:130px;
+  }
+  .metric-name { color:#66758b; font-size:11px; }
+  .metric-number { font-size:19px; font-weight:800; color:#1f2f47; margin:7px 0 9px; }
+  .progress {
+    height:7px; border-radius:5px; background:#edf0f4; overflow:hidden; margin-bottom:8px;
+  }
+  .progress > span { display:block; height:100%; border-radius:5px; }
+  .p-teal { background:#16aaa2; } .p-blue { background:#3c83e8; }
+  .p-purple { background:#8958d9; } .p-pink { background:#d80072; }
+  .metric-foot { display:flex; justify-content:space-between; color:#728097; font-size:10px; }
+  .metric-foot b { color:#46566c; }
+ 
+  .channel-row { display:flex; align-items:center; gap:8px; margin:14px 0; }
+  .channel-label { width:45px; font-weight:700; }
+  .bar { flex:1; height:10px; background:#eef1f5; border-radius:5px; overflow:hidden; }
+  .bar span { display:block; height:100%; border-radius:5px; }
+  .bar-blue { background:#2777e8; } .bar-green { background:#10a88e; } .bar-purple { background:#8958d9; }
+  .channel-pct { width:36px; text-align:right; font-weight:700; font-size:11px; }
+ 
+  .alerts { padding:18px; border-radius:24px; }
+  .alert-row {
+    display:grid; grid-template-columns:20px 1fr auto; gap:8px;
+    padding:10px 0; border-bottom:1px solid #edf0f3; align-items:start;
+  }
+  .alert-row:last-child { border-bottom:0; }
+  .alert-icon { font-size:13px; }
+  .alert-red { color:#e34a4a; } .alert-yellow { color:#e4a018; } .alert-blue { color:#377fe3; } .alert-gray { color:#9aa4b2; }
+  .alert-text b { display:block; font-size:11px; margin-bottom:3px; }
+  .alert-text span { color:#738096; font-size:10px; }
+  .alert-time { color:#9aa4b2; font-size:9px; }
+ 
+  @media (max-width: 1350px) {
+    .main-grid { grid-template-columns: 1fr; }
+    .bottom-grid { grid-template-columns:1fr; }
+    .sidebar { width:145px; }
+  }
+  @media (max-width: 800px) {
+    .sidebar { display:none; }
+    .page-head { flex-wrap:wrap; gap:10px; }
+    .filters { grid-template-columns:1fr 1fr; }
+    .topbar { padding:0 12px; }
+    main { padding:12px; }
+  }
+</style>
+</head>
+<body>
+<header class="topbar">
+<div class="brand"><span><img src="https://lgupluscorp-mid-prod1-all-res.adobe-campaign.com/res/tracking/U+_logo.png" class="header-logo" width="30px"></span> OA 대시보드 </div>
+<div class="crumb">›　캠페인 발송 스케줄</div>
+<div class="top-actions">
+<div class="user"><span class="avatar"><svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="8" r="4"></circle></svg></span><span>운영자 님</span></div>
+</div>
+</header>
+ 
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <button class="sidebar-toggle" id="sidebarToggle" aria-label="사이드 메뉴 접기" title="사이드 메뉴 접기">‹</button>
+    <nav class="nav">
+    <a href="#" class="active"><span class="nav-icon">⌂</span><span class="nav-label">Home</span></a>
+    <a href="#"><span class="nav-icon">▣</span><span class="nav-label">캠페인 발송 스케줄</span></a>
+    <a href="#"><span class="nav-icon">▣</span><span class="nav-label">일일 캐파 보드</span></a>
+    <a href="#"><span class="nav-icon">▣</span><span class="nav-label">월간 캐파 관리</span></a>
+    <a href="#"><span class="nav-icon">□</span><span class="nav-label">랜딩 관리</span></a>
+    <a href="#"><span class="nav-icon">♧</span><span class="nav-label">메시지 관리</span></a>
+    <a href="#"><span class="nav-icon">◷</span><span class="nav-label">UTM 관리</span></a>
+    </nav>
+  </aside>
+   
+  <main>
+    <div style="margin:6px 0 5px;color:#77788a;font-size:13px;font-weight:600;">2026년 9월 22일 화요일
+    </div>
+    <div class="page-head">
+      <h1 class="page-title">캠페인 발송 스케줄</h1>
+      <div class="page-tools">
+      <button class="date-picker">2026년 9월 22일 (화)　‹ ›</button>
+      <button class="btn" onclick="alert('오늘 날짜로 이동합니다.')">오늘</button>
+      <button class="btn primary" onclick="alert('캠페인 등록 화면을 연결할 수 있습니다.')">캠페인 등록</button>
+      </div>
+    </div>
+     
+    <div class="channels">
+      <label><input type="checkbox" checked> MMS/LMS</label>
+      <label><input type="checkbox" checked> RCS</label>
+      <label><input type="checkbox" checked> App Push</label>
+    </div>
+     
+        <section class="main-grid">
+
+          <div class="card calendar-card">
+            <div class="month-head">
+            <button class="square-btn">‹</button>
+            <strong>2026년 9월</strong>
+            <button class="square-btn">›</button>
+            </div>
+            <div class="calendar" id="calendar"></div>
+            <div class="calendar-legend">
+            <span><i class="legend-dot legend-mms"></i>M : MMS</span>
+            <span><i class="legend-dot legend-push"></i>P : PUSH</span>
+            <span><i class="legend-dot legend-rcs"></i>R : RCS</span>
+            </div>
+          </div>
+           
+
+           
+          <div class="card campaign-card">
+            <div class="section-title"><span class="mark">◉</span> 캠페인 리스트 <span style="margin-left:auto;font-size:10px;color:#8b97a8;font-weight:400;">총 20개 캠페인 유형 · 실시간 캐파 반영</span></div>
+            <div class="filters">
+            <span style="font-size:12px">발송일자</span>
+            <input type="date" value="2026-09-22">
+            <span class="dash">~</span>
+            <input type="date" value="2026-09-22">
+            <select><option>트리거여부</option><option>전체</option><option>트리거</option></select>
+            <select style="width: 200px;"><option>검색조건</option><option>캠페인명</option><option>마케팅목적</option><option>사용팀</option></select>
+            <input class="search-input" placeholder="캠페인명, 고객명, 캠페인ID 입력">
+            <button class="search-btn" onclick="filterRows()">검색</button>
+            </div>
+           
+            <div class="table-wrap">
+              <table id="campaignTable">
+                <thead>
+                <tr>
+                <th>채널 ↕</th><th>발송일시 ↕</th><th>예약건수 ↕</th><th>성공건수 ↕</th>
+                <th>실패건수 ↕</th><th>구분 ↕</th><th>마케팅목적 ↕</th><th>마케팅활동 ↕</th>
+                <th>캠페인명 ↕</th><th>플로우상태 ↕</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:12</td><td class="num-blue">0</td><td class="num-dark">447</td><td class="num-red">8</td><td>자사</td><td>고객케어</td><td>홈서비스 신규고객 웰컴키트</td><td>홈온보딩_리뉴얼_2026</td><td><span class="status done">발송완료</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:12</td><td class="num-blue">88,230</td><td class="num-dark">69,313</td><td class="num-red">10,188</td><td>자사</td><td>상품/서비스홍보</td><td>소호 사장님광장 활성화</td><td>26년 9월 쏘기 MMS_260922</td><td><span class="status running">발송중</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:13</td><td class="num-blue">0</td><td class="num-dark">141</td><td class="num-red">155</td><td>자사</td><td>고객케어</td><td>홈서비스 신규고객 웰컴키트</td><td>홈온보딩_홈단독_2026</td><td><span class="status">대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:13</td><td class="num-blue">0</td><td class="num-dark">88</td><td class="num-red">235</td><td>자사</td><td>고객케어</td><td>홈서비스 신규고객 웰컴키트</td><td>홈온보딩_홈단독_2026</td><td><span class="status">대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:13</td><td class="num-blue">0</td><td class="num-dark">21</td><td class="num-red">2</td><td>자사</td><td>고객케어</td><td>홈서비스 신규고객 웰컴키트</td><td>홈온보딩_홈단독_2026</td><td><span class="status">대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:14</td><td class="num-blue">0</td><td class="num-dark">1,287</td><td class="num-red">51</td><td>자사</td><td>고객케어</td><td>홈서비스 신규고객 웰컴키트</td><td>홈온보딩_리뉴얼_2026</td><td><span class="status wait">승인대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:14</td><td class="num-blue">0</td><td class="num-dark">630</td><td class="num-red">11</td><td>자사</td><td>앱활성화</td><td>모바일 맞춤제안 요금제</td><td>디지털_모바일앱셀_실시간A_2609</td><td><span class="status">대기</span></td></tr>
+                <tr><td class="channel push">PUSH</td><td>2026-09-22 14:14</td><td class="num-blue">0</td><td class="num-dark">619</td><td class="num-red">22</td><td>자사</td><td>앱활성화</td><td>모바일 맞춤제안 요금제</td><td>디지털_모바일앱셀_실시간A_2609</td><td><span class="status">대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:14</td><td class="num-blue">0</td><td class="num-dark">135,472</td><td class="num-red">34,147</td><td>자사</td><td>상품/서비스홍보</td><td>AI 사업 마케팅</td><td>2026.09 구글원</td><td><span class="status wait">승인대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 14:33</td><td class="num-blue">0</td><td class="num-dark">62</td><td class="num-red">2</td><td>자사</td><td>고객케어</td><td>홈서비스 신규고객 웰컴키트</td><td>홈온보딩_리뉴얼_2026</td><td><span class="status">대기</span></td></tr>
+                <tr><td class="channel">MMS</td><td>2026-09-22 15:00</td><td class="num-blue">13,861</td><td class="num-dark">9,039</td><td class="num-red">0</td><td>타사</td><td>고객케어</td><td>IMSI 대응 안내</td><td>26년4월_IMSI_매장내방_고객케어_감</td><td><span class="status done">확인완료</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+           
+            <div class="summary">
+            <span class="summary-item">총 예약건수 <span class="summary-value">3,918,134</span></span>
+            <span class="summary-item">총 성공건수 <span class="summary-value">3,916,490</span></span>
+            <span class="summary-item">총 실패건수 <span class="summary-value">593,887</span></span>
+            </div>
+            <div class="warning">※ MMS 발송은 예약한 발송일시, 플로우 차트 적재 시간 순서대로 발송됩니다. 단, 발송물량이 많을 경우 예약한 발송일시와 실제 발송시간이 맞지 않을 수 있습니다.</div>
+          </div>
+        </section>
+     
+        <section class="bottom-grid">
+          <div class="card metric-card">
+          <div class="metric-title">캠페인 발송 캐파 안내</div>
+           <div class="notice">
+           <ul>
+            <li>MMS 발송 건수 최대 640만 건, 시간별 발송 최대 건수 640만 건</li>
+            <li>PUSH 발송 건수 최대 450만 건, 시간별 발송 최대 건수 150만 건</li>
+            <li>마케팅통합 월/일/월별 발송 최대 건수<button class="btn small" onclick="alert('팝업확인')">확인</button></li>
+            </ul>
+            <div class="small">※ 발송 건수 합계는 만 단위 올림으로 표시합니다. 예)M1만(2): 발송합계 1만, 캠페인수2</div>
+            <div class="small blue" style="margin-top:8px;">1) 예상 발송건수 반영을 위해 캠피인 등록 시 예상모수 정의 필수</div>
+            <div class="small blue">2) 팀 단위 월 30만 이상 문자 발송시 별도 통신 합의 요청(미준수 시 패널티 부여)</div>
+          </div>
+          </div>
+          <div class="card metric-card">
+          <div class="metric-title">오늘 캐파 사용 현황</div>
+          <div class="channel-row"><span class="channel-label">MMS</span><div class="bar"><span class="bar-blue" style="width:68%"></span></div><span class="channel-pct">68%</span><span style="font-size:10px;color:#738096">204,000</span></div>
+          <div class="channel-row"><span class="channel-label">PUSH</span><div class="bar"><span class="bar-green" style="width:42%"></span></div><span class="channel-pct">42%</span><span style="font-size:10px;color:#738096">63,000</span></div>
+          <div class="channel-row"><span class="channel-label">RCS</span><div class="bar"><span class="bar-purple" style="width:31%"></span></div><span class="channel-pct">31%</span><span style="font-size:10px;color:#738096">29,000</span></div>
+          </div>
+          <div class="card metric-card">
+          <div class="metric-title">월간 캐파 <span style="color:#8b97a8;font-size:10px;">(해당월 기준)</span></div>
+                <div class="metric-number">10,000,000</div>
+                <div class="progress"><span class="p-pink" style="width:88.2%"></span></div>
+                <div class="metric-foot"><span>사용 <b>8,820,000</b></span><span>예약 <b>850,000</b></span></div>
+                <div class="metric-foot" style="margin-top:5px;"><span>잔여 <b>330,000</b></span><span>88.2%</span></div>
+          </div>
+        </section>
+  </main>
+</div>
+ 
+<script>
+  // 간단한 2026년 9월 달력 생성
+  const calendar = document.getElementById('calendar');
+  const days = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+  days.forEach((d,i)=>{
+    const el=document.createElement('div');
+    el.className='dow '+(i===0?'sun ':'')+(i===6?'sat':'');
+    el.textContent=d.slice(0,3);
+    calendar.appendChild(el);
+  });
+  const first = new Date(2026,8,1).getDay();
+  const prevDays = new Date(2026,8,0).getDate();
+  for(let i=first-1;i>=0;i--) addDay(prevDays-i,'muted');
+  for(let d=1;d<=30;d++) addDay(d, d===22?'today':'');
+  const totalCells = 42;
+  const filled = first + 30;
+  for(let d=1;d<=totalCells-filled;d++) addDay(d,'muted');
+ 
+  function addDay(n, cls){
+    const el=document.createElement('div');
+    el.className='day '+cls;
+    const base = n * 17;
+    el.innerHTML=`<div class="day-num">${n}</div>
+<div class="day-lines">
+<div>M ${Math.max(0, (base+24))}만(${(n%23)+2})</div>
+<div>P ${Math.max(0, (base+7))}만(${(n%18)+1})</div>
+<div>R ${Math.max(0, (base+3))}만(${(n%9)+1})</div>
+</div>`;
+    calendar.appendChild(el);
+  }
+ 
+  function filterRows(){
+    const q = document.querySelector('.search-input').value.trim().toLowerCase();
+    document.querySelectorAll('#campaignTable tbody tr').forEach(row=>{
+      row.style.display = !q || row.innerText.toLowerCase().includes(q) ? '' : 'none';
+    });
+  }
+</script>
+ 
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggle = document.getElementById('sidebarToggle');
+ 
+  function setSidebar(collapsed) {
+    sidebar.classList.toggle('collapsed', collapsed);
+    toggle.textContent = collapsed ? '›' : '‹';
+    toggle.title = collapsed ? '사이드 메뉴 펼치기' : '사이드 메뉴 접기';
+    toggle.setAttribute('aria-label', toggle.title);
+    localStorage.setItem('oaGateSidebarCollapsed', collapsed ? '1' : '0');
+  }
+ 
+  setSidebar(localStorage.getItem('oaGateSidebarCollapsed') === '1');
+  toggle.addEventListener('click', () => {
+    setSidebar(!sidebar.classList.contains('collapsed'));
+  });
+</script>
+ 
+</body>
+</html>
